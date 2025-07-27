@@ -61,9 +61,6 @@ export class DirectoryAnalyzer {
     const projectInfo = this.extractProjectInfo(dirPath, files);
 
     return {
-      name: projectInfo.name,
-      description: projectInfo.description,
-      language: projectInfo.language,
       path: dirPath,
       files,
       structure,

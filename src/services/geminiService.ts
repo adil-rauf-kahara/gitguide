@@ -1,6 +1,16 @@
 import fetch from 'node-fetch';
 import { ProjectData, GeneratedReadme } from '../types';
 
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
+}
+
 export class GeminiService {
   private apiKey: string;
   private readonly apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
@@ -37,7 +47,7 @@ export class GeminiService {
       throw new Error(`Gemini API error: ${errorData.error?.message || 'Unknown error'}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as GeminiResponse;
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     if (!content) {
@@ -54,14 +64,24 @@ export class GeminiService {
   private buildPrompt(projectData: ProjectData): string {
     const techStack = this.detectTechStack(projectData);
     const projectType = this.detectProjectType(projectData);
+    const codeAnalysis = this.analyzeCodeStructure(projectData);
     
     const fileContents = projectData.files
       .filter(file => file.content && file.type === 'file' && file.content.length > 10)
-      .slice(0, 15)
-      .map(file => `File: ${file.path}\n${file.content.slice(0, 2000)}`)
+      .slice(0, 20)
+      .map(file => `File: ${file.path}\n${file.content?.slice(0, 3000) || ''}`)
       .join('\n\n---\n\n');
 
-    return `You are an expert technical writer creating a professional README.md for a local project directory.
+    return `You are an expert technical writer and software developer creating a comprehensive README.md for a project. 
+
+CRITICAL INSTRUCTIONS:
+- Analyze the actual code files to understand what this application DOES
+- Write about the specific functionality, features, and purpose based on the code
+- DO NOT use generic descriptions - be specific about this project's actual capabilities
+- Include real installation steps based on the package.json and project structure
+- Mention actual components, routes, APIs, or features found in the code
+- If it's a CLI tool, describe the actual commands and options
+- If it's a web app, describe the actual pages and functionality
 
 PROJECT DETAILS:
 Name: ${projectData.name}
@@ -70,6 +90,7 @@ Primary Language: ${projectData.language || 'Not specified'}
 Version: ${projectData.version || '1.0.0'}
 Tech Stack: ${techStack}
 Project Type: ${projectType}
+Code Analysis: ${codeAnalysis}
 Files: ${projectData.structure.files} files across ${projectData.structure.directories} directories
 
 KEY FILES CONTENT:
@@ -77,7 +98,7 @@ ${fileContents}
 
 Generate a comprehensive, professional README.md using ONLY pure markdown syntax (NO HTML tags).
 
-STRUCTURE:
+REQUIRED STRUCTURE:
 # ${projectData.name}
 
 > **${this.generateTagline(projectData, projectType)}**
@@ -89,7 +110,7 @@ ${projectData.description || `A ${projectData.language} project built with moder
 
 ## ✨ Features
 
-${this.generateFeatures(projectType)}
+${this.generateFeatures(projectType, projectData)}
 
 ## 🚀 Quick Start
 
@@ -101,13 +122,19 @@ ${this.generatePrerequisites(projectData)}
 ${this.generateInstallCommands(projectData)}
 \`\`\`
 
-### Usage
+### Running the Application
 ${this.generateUsageExample(projectData, projectType)}
 
 ## 📁 Project Structure
 \`\`\`
 ${this.generateProjectStructure(projectData)}
 \`\`\`
+
+## 🔧 Configuration
+${this.generateConfigurationSection(projectData)}
+
+## 📖 API Documentation
+${this.generateApiDocumentation(projectData)}
 
 ## 🛠️ Tech Stack
 ${this.generateTechStackDetails(techStack)}
@@ -137,16 +164,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Made with ❤️ by the ${projectData.name} team
 
 REQUIREMENTS:
-- Use ONLY markdown syntax (no HTML)
-- Make it comprehensive but scannable
-- Include proper code formatting
-- Use emojis for visual appeal
-- Focus on clarity and professionalism
-- Ensure GitHub compatibility`;
+1. ANALYZE THE ACTUAL CODE - Don't use generic descriptions
+2. Write about what this specific application actually does
+3. Include real features found in the code
+4. Use actual file names, component names, and functionality
+5. Provide accurate installation and usage instructions
+6. Use ONLY markdown syntax (no HTML)
+7. Make it comprehensive but scannable
+8. Include proper code formatting with language-specific syntax highlighting
+9. Focus on clarity and professionalism`;
   }
 
   private generateTagline(projectData: ProjectData, projectType: string): string {
-    const taglines = {
+    const taglines: { [key: string]: string } = {
       'Frontend Application': `🚀 Modern ${projectData.language} application with sleek UI/UX`,
       'Backend API': `⚡ High-performance ${projectData.language} API built for scale`,
       'Full-Stack Application': `🔥 Complete full-stack solution powered by ${projectData.language}`,
@@ -160,8 +190,51 @@ REQUIREMENTS:
     return taglines[projectType] || taglines.default;
   }
 
-  private generateFeatures(projectType: string): string {
-    const features = {
+  private analyzeCodeStructure(projectData: ProjectData): string {
+    const analysis: string[] = [];
+    
+    // Analyze package.json for scripts and dependencies
+    const packageJson = projectData.files.find(f => f.name === 'package.json');
+    if (packageJson?.content) {
+      try {
+        const pkg = JSON.parse(packageJson.content);
+        if (pkg.scripts) {
+          analysis.push(`Available scripts: ${Object.keys(pkg.scripts).join(', ')}`);
+        }
+        if (pkg.bin) {
+          analysis.push(`CLI commands: ${Object.keys(pkg.bin).join(', ')}`);
+        }
+      } catch (error) {
+        // Ignore parse errors
+      }
+    }
+    
+    // Analyze main source files
+    const sourceFiles = projectData.files.filter(f => 
+      f.type === 'file' && 
+      (f.path.includes('src/') || f.path.includes('lib/') || f.name.includes('index') || f.name.includes('main'))
+    );
+    
+    if (sourceFiles.length > 0) {
+      analysis.push(`Main source files: ${sourceFiles.map(f => f.name).join(', ')}`);
+    }
+    
+    // Look for specific patterns
+    const hasRoutes = projectData.files.some(f => f.content?.includes('route') || f.path.includes('route'));
+    const hasComponents = projectData.files.some(f => f.path.includes('component') || f.content?.includes('component'));
+    const hasAPI = projectData.files.some(f => f.path.includes('api') || f.content?.includes('express') || f.content?.includes('fastify'));
+    const hasCLI = projectData.files.some(f => f.content?.includes('commander') || f.content?.includes('yargs') || f.content?.includes('#!/usr/bin/env'));
+    
+    if (hasRoutes) analysis.push('Contains routing functionality');
+    if (hasComponents) analysis.push('Uses component-based architecture');
+    if (hasAPI) analysis.push('Includes API/server functionality');
+    if (hasCLI) analysis.push('Command-line interface detected');
+    
+    return analysis.length > 0 ? analysis.join(', ') : 'Standard project structure';
+  }
+
+  private generateFeatures(projectType: string, projectData: ProjectData): string {
+    const features: { [key: string]: string } = {
       'Frontend Application': `- 🎨 Modern, responsive design
 - ⚡ Optimized performance
 - 📱 Mobile-first approach
@@ -184,6 +257,8 @@ REQUIREMENTS:
 - 🧪 Thoroughly tested`
     };
 
+    // TODO: Analyze actual code to generate specific features
+    // This should be enhanced to read actual functionality from the code
     return features[projectType] || features.default;
   }
 
@@ -277,6 +352,44 @@ npm run dev
   📄 package.json
   📁 src/
     📄 index.js`;
+  }
+
+  private generateConfigurationSection(projectData: ProjectData): string {
+    const configFiles = projectData.files.filter(f => 
+      f.name.includes('config') || 
+      f.name.startsWith('.env') || 
+      f.name === 'tsconfig.json' ||
+      f.name === 'tailwind.config.js' ||
+      f.name === 'vite.config.js'
+    );
+    
+    if (configFiles.length === 0) {
+      return 'No specific configuration required. The application works with default settings.';
+    }
+    
+    const configList = configFiles.map(f => `- \`${f.name}\`: Configuration file`).join('\n');
+    return `The following configuration files are available:\n\n${configList}\n\nRefer to each file for specific configuration options.`;
+  }
+
+  private generateApiDocumentation(projectData: ProjectData): string {
+    const hasAPI = projectData.files.some(f => 
+      f.path.includes('api') || 
+      f.content?.includes('express') || 
+      f.content?.includes('fastify') ||
+      f.content?.includes('router')
+    );
+    
+    if (!hasAPI) {
+      return 'This project does not include API endpoints.';
+    }
+    
+    return `API endpoints are available. Check the source code for specific routes and documentation.
+
+Common endpoints may include:
+- \`GET /\` - Main application route
+- Additional routes as defined in the source code
+
+Refer to the API source files for complete documentation.`;
   }
 
   private generateTechStackDetails(techStack: string): string {

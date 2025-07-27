@@ -1,143 +1,135 @@
-# GitGuide - AI README Generator CLI
+# gitguide
 
-> **🚀 Transform any project directory into professional documentation with AI**
+> **🛠️ Powerful command-line tool for developers**
 
-GitGuide is a powerful command-line tool that analyzes your project directory and generates comprehensive README.md files using Google's Gemini AI.
+AI-powered README generator for any project directory
 
-[![NPM Version](https://img.shields.io/npm/v/gitguide.svg)](https://www.npmjs.com/package/gitguide)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)]()
 
 ## ✨ Features
 
-- 🤖 **AI-Powered** - Uses Google Gemini AI for intelligent README generation
-- 📁 **Local Analysis** - Works with any local project directory
-- 🔧 **Easy Setup** - Simple configuration with your Gemini API key
-- 🎯 **Smart Detection** - Automatically detects project type, tech stack, and structure
-- 📝 **Professional Output** - Generates GitHub-ready markdown documentation
-- ⚡ **Fast & Efficient** - Analyzes projects quickly with intelligent file filtering
-- 🌐 **Universal** - Works with any programming language or framework
+- AI-powered README generation using the Google Gemini API.
+- Analyzes project directory structure and files to create a tailored README.
+- Interactive command-line interface using Inquirer.js for configuration and generation.
+- Handles various project types and programming languages.
+- Configurable output filename and target directory.
+- Robust error handling and informative feedback to the user.
+- Supports overwriting existing README files.
 
 ## 🚀 Quick Start
 
+### Prerequisites
+- Node.js (v16 or higher)  ([Download Node.js](https://nodejs.org/))
+- npm or yarn package manager
+- A Google Gemini API key (obtainable from [Google AI Studio](https://makersuite.google.com/app/apikey))
+
 ### Installation
 
-Install GitGuide globally via npm:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/gitguide.git
+   cd gitguide
+   ```
 
-```bash
-npm install -g gitguide
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-### Setup
-
-1. Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Configure GitGuide with your API key:
-
-```bash
-gitguide config
-```
+3. **(Optional) Build:** For production use, build the project:
+   ```bash
+   npm run build
+   ```
 
 ### Usage
 
-Generate a README for your current directory:
+1. **Configure API Key:** This is a one-time setup.  The tool will guide you through the process interactively.
+   ```bash
+   gitguide config
+   ```
+   You will be prompted to enter your Gemini API key securely.
 
-```bash
-gitguide generate
-```
+2. **Generate a README:** Navigate to the project directory for which you want to generate a README. Then run:
+   ```bash
+   gitguide generate
+   ```
+   This generates a `README.md` in the current directory.  To specify a different directory or output file, use the options:
 
-Or specify a different directory:
-
-```bash
-gitguide generate -d ./my-project
-```
-
-## 📖 Commands
-
-### `gitguide config`
-Set up your Gemini API key. This only needs to be done once.
-
-### `gitguide generate` (or `gitguide gen`)
-Generate a README.md file for your project.
-
-**Options:**
-- `-d, --directory <path>` - Target directory (default: current directory)
-- `-o, --output <filename>` - Output filename (default: README.md)
-- `--force` - Overwrite existing README.md
-
-**Examples:**
-```bash
-# Generate README for current directory
-gitguide generate
-
-# Generate for specific directory
-gitguide gen -d ./my-awesome-project
-
-# Custom output filename
-gitguide generate -o DOCUMENTATION.md
-
-# Force overwrite existing README
-gitguide gen --force
-```
-
-### `gitguide help`
-Show help information and usage examples.
-
-## 🏗️ How It Works
-
-1. **Directory Analysis** - Scans your project directory and subdirectories
-2. **File Processing** - Intelligently reads and processes relevant files
-3. **Project Detection** - Identifies programming language, frameworks, and project type
-4. **AI Generation** - Uses Gemini AI to create comprehensive documentation
-5. **README Creation** - Saves the generated README.md to your project
-
-## 🛠️ Tech Stack
-
-- **Node.js** - Runtime environment
-- **TypeScript** - Type-safe development
-- **Commander.js** - CLI framework
-- **Inquirer.js** - Interactive prompts
-- **Chalk** - Terminal styling
-- **Ora** - Loading spinners
-- **Google Gemini AI** - Content generation
+   ```bash
+   gitguide generate -d ./my-project -o myreadme.md
+   ```
+   Use `--force` to overwrite an existing `README.md` file.
 
 ## 📁 Project Structure
 
 ```
-gitguide/
-├── 📄 package.json
-├── 📄 tsconfig.json
-├── 📄 README.md
-├── 📁 src/
-│   ├── 📄 cli.ts              # CLI entry point
-│   ├── 📄 index.ts            # Main exports
-│   ├── 📁 commands/           # CLI commands
-│   │   ├── 📄 config.ts       # API key configuration
-│   │   └── 📄 generate.ts     # README generation
-│   ├── 📁 services/           # Core services
-│   │   ├── 📄 directoryAnalyzer.ts
-│   │   └── 📄 geminiService.ts
-│   ├── 📁 utils/              # Utilities
-│   │   └── 📄 config.ts       # Config management
-│   └── 📁 types/              # TypeScript types
-│       └── 📄 index.ts
-└── 📁 dist/                   # Compiled JavaScript
+.
+├── package.json
+├── tsconfig.json
+├── README.md
+├── LICENSE
+├── index.js
+└── src
+    ├── commands
+    │   ├── config.ts
+    │   └── generate.ts
+    ├── services
+    │   ├── directoryAnalyzer.ts
+    │   └── geminiService.ts
+    ├── types
+    │   └── index.ts
+    └── utils
+        └── config.ts
 ```
 
-## 🔐 Privacy & Security
+## 🔧 Configuration
 
-- Your API key is stored locally in `~/.gitguide/config.json`
-- No project data is stored or transmitted except to Gemini AI for generation
-- All file processing happens locally on your machine
+The application uses a configuration file stored in `~/.gitguide/config.json`.  This file stores your Gemini API key.  The `gitguide config` command handles the creation and updating of this file.  It uses the `inquirer` package for a user-friendly interactive experience.
+
+## 📖 Commands
+
+- `gitguide config`: Sets up your Gemini API key. This is required before generating READMEs.  The command will guide you through the process of securely entering your key.
+- `gitguide generate` or `gitguide gen`: Generates a README.md file in the specified (or current) directory.  See options above.
+- `gitguide --help`: Displays help information.
+
+## 🛠️ Tech Stack
+
+**Core Technologies:**
+
+- Node.js
+- TypeScript
+
+**Dependencies:**
+
+- `commander`: Command-line interface parsing.
+- `inquirer`: Interactive command-line prompts.
+- `chalk`: Terminal styling.
+- `ora`: Elegant terminal spinners.
+- `node-fetch`: HTTP client.
+- `fs-extra`: File system utilities.
+
+## 📚 Components and Functionality
+
+The application is built with a component-based architecture using TypeScript.  Key components include:
+
+- **`cli.ts`:** The command-line interface entry point, using the `commander` library to parse commands and options.  It handles the `config` and `generate` commands, delegating the core logic to other modules.
+- **`commands/config.ts`:**  Handles the configuration of the Gemini API key, using `inquirer` for user interaction and `fs-extra` for file system operations.
+- **`commands/generate.ts`:** The core logic for README generation. It uses `directoryAnalyzer.ts` to analyze the project directory and `geminiService.ts` to interact with the Google Gemini API.
+- **`services/directoryAnalyzer.ts`:**  Recursively analyzes the project directory structure, identifying files and extracting relevant information.  It employs intelligent exclusion patterns to ignore common build artifacts and version control files.
+- **`services/geminiService.ts`:**  Handles communication with the Google Gemini API. It constructs a prompt based on the project data and sends it to the API, processing the response to extract the generated README content.
+- **`utils/config.ts`:** Manages the configuration file, reading and writing the API key securely.
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+Contributions are welcome! Please follow these steps:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Make your changes.
+4. Commit your changes (`git commit -m "Add some feature"`).
+5. Push to the branch (`git push origin feature/your-feature`).
+6. Create a pull request.
 
 ## 📄 License
 
@@ -145,12 +137,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Google Gemini AI for powerful content generation
-- The open-source community for inspiration
-- All contributors and users of GitGuide
+- Google Gemini API
+- All contributors
 
 ---
-
-**Need help?** Open an issue on GitHub or check out our [documentation](https://github.com/yourusername/gitguide).
-
-Made with ❤️ by developers, for developers.
+Made with ❤️ by the gitguide team
