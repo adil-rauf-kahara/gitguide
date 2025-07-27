@@ -1,20 +1,25 @@
-export interface GitHubFile {
+export interface ProjectFile {
   name: string;
   path: string;
-  type: 'file' | 'dir';
+  type: 'file' | 'directory';
+  size: number;
   content?: string;
-  size?: number;
 }
 
-export interface Repository {
+export interface ProjectStructure {
+  files: number;
+  directories: number;
+  languages: { [key: string]: number };
+}
+
+export interface ProjectData {
   name: string;
   description: string;
   language: string;
-  stars: number;
-  forks: number;
-  owner: string;
-  url: string;
-  files: GitHubFile[];
+  version?: string;
+  path: string;
+  files: ProjectFile[];
+  structure: ProjectStructure;
 }
 
 export interface GeneratedReadme {
@@ -22,4 +27,9 @@ export interface GeneratedReadme {
   sections: string[];
 }
 
-export type AppStep = 'input' | 'analyzing' | 'generating' | 'preview' | 'edit';
+export interface ExtractedProjectInfo {
+  name: string;
+  description: string;
+  language: string;
+  version: string;
+}
