@@ -1,15 +1,10 @@
 {
   "name": "gitguide",
   "version": "1.0.0",
-  "author": "Adil Rauf Kahara <adilraufkahara@vebtual.com>",
   "description": "AI-powered README generator for any project directory",
   "main": "dist/index.js",
   "bin": {
     "gitguide": "dist/cli.js"
-  },
-    "repository": {
-    "type": "git",
-    "url": "https://github.com/adilraufkahara/gitguide.git"
   },
   "scripts": {
     "build": "tsc",
@@ -26,7 +21,7 @@
     "markdown",
     "git"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Adil Rauf Kahara <adilraufkahara@vebtual.com>",
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
@@ -51,10 +46,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/gitguide.git"
+    "url": "https://github.com/adilraufkahara/gitguide.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/gitguide/issues"
+    "url": "https://github.com/adilraufkahara/gitguide/issues"
   },
-  "homepage": "https://github.com/yourusername/gitguide#readme"
+  "homepage": "https://github.com/adilraufkahara/gitguide#readme"
 }
